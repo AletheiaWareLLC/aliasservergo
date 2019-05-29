@@ -43,7 +43,7 @@ func TestAliasHandler(t *testing.T) {
 		aliases := aliasgo.OpenAndLoadAliasChannel(cache, nil)
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
 		handler(response, request)
 
 		expected := ""
@@ -56,10 +56,21 @@ func TestAliasHandler(t *testing.T) {
 	t.Run("GETExists", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/alias?alias=Alice", nil)
 		response := httptest.NewRecorder()
-
 		key, err := rsa.GenerateKey(rand.Reader, 4096)
 		testinggo.AssertNoError(t, err)
-		record, err := aliasgo.CreateAliasRecord("Alice", key)
+		publicKeyBytes, err := bcgo.RSAPublicKeyToPKIXBytes(&key.PublicKey)
+		testinggo.AssertNoError(t, err)
+		publicKeyFormat := bcgo.PublicKeyFormat_PKIX
+		hash, err := bcgo.HashProtobuf(&aliasgo.Alias{
+			Alias:        "Alice",
+			PublicKey:    publicKeyBytes,
+			PublicFormat: publicKeyFormat,
+		})
+		testinggo.AssertNoError(t, err)
+		signatureAlgorithm := bcgo.SignatureAlgorithm_SHA512WITHRSA_PSS
+		signature, err := bcgo.CreateSignature(key, hash, signatureAlgorithm)
+		testinggo.AssertNoError(t, err)
+		record, err := aliasgo.CreateAliasRecord("Alice", publicKeyBytes, publicKeyFormat, signature, signatureAlgorithm)
 		testinggo.AssertNoError(t, err)
 		recordHash, err := bcgo.HashProtobuf(record)
 		testinggo.AssertNoError(t, err)
@@ -85,11 +96,9 @@ func TestAliasHandler(t *testing.T) {
 		aliases := aliasgo.OpenAndLoadAliasChannel(cache, nil)
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
 		handler(response, request)
 
-		publicKeyBytes, err := bcgo.RSAPublicKeyToPKIXBytes(&key.PublicKey)
-		testinggo.AssertNoError(t, err)
 		expected := "Alias:Alice Timestamp:" + bcgo.TimestampToString(block.Timestamp) + " PublicKey:" + base64.RawURLEncoding.EncodeToString(publicKeyBytes)
 		got := response.Body.String()
 
