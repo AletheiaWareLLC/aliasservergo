@@ -28,7 +28,7 @@ import (
 	"time"
 )
 
-func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {

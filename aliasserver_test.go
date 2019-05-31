@@ -43,7 +43,7 @@ func TestAliasHandler(t *testing.T) {
 		aliases := aliasgo.OpenAndLoadAliasChannel(cache, nil)
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, temp)
 		handler(response, request)
 
 		expected := ""
@@ -96,7 +96,7 @@ func TestAliasHandler(t *testing.T) {
 		aliases := aliasgo.OpenAndLoadAliasChannel(cache, nil)
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, temp)
 		handler(response, request)
 
 		expected := "Alias:Alice Timestamp:" + bcgo.TimestampToString(block.Timestamp) + " PublicKey:" + base64.RawURLEncoding.EncodeToString(publicKeyBytes)
@@ -118,13 +118,13 @@ func TestAliasRegistrationHandler(t *testing.T) {
 	t.Run("POSTEmpty", func(t *testing.T) {
 		// TODO
 	})
+	t.Run("POSTUnique", func(t *testing.T) {
+		// TODO
+	})
 	t.Run("POSTNotUnique", func(t *testing.T) {
 		// TODO
 	})
 	t.Run("POSTInvalidSignature", func(t *testing.T) {
-		// TODO
-	})
-	t.Run("POSTUnique", func(t *testing.T) {
 		// TODO
 	})
 }
