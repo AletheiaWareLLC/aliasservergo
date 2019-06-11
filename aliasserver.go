@@ -166,12 +166,12 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 					SignatureAlgorithm:  sigAlg,
 				}
 
-				reference, err := bcgo.WriteRecord(aliases.GetName(), node.Cache, record)
+				reference, err := bcgo.WriteRecord(aliasgo.ALIAS, node.Cache, record)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				log.Println("Created Record", base64.RawURLEncoding.EncodeToString(reference.RecordHash))
+				log.Println("Wrote Record", base64.RawURLEncoding.EncodeToString(reference.RecordHash))
 
 				// Mine record into blockchain
 				hash, _, err := node.Mine(aliases, listener)
