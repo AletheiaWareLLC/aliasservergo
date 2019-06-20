@@ -40,10 +40,10 @@ func TestAliasHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		cache := bcgo.NewMemoryCache(10)
-		aliases := aliasgo.OpenAndLoadAliasChannel(cache, nil)
+		aliases := aliasgo.OpenAliasChannel()
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
 		handler(response, request)
 
 		expected := ""
@@ -93,10 +93,13 @@ func TestAliasHandler(t *testing.T) {
 			BlockHash:   blockHash,
 		})
 		cache.PutBlock(blockHash, block)
-		aliases := aliasgo.OpenAndLoadAliasChannel(cache, nil)
+		aliases := aliasgo.OpenAliasChannel()
+		if err := bcgo.LoadHead(aliases, cache, nil); err != nil {
+			t.Errorf("Expected no error, got '%s'", err)
+		}
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
 		handler(response, request)
 
 		expected := "Alias:Alice Timestamp:" + bcgo.TimestampToString(block.Timestamp) + " PublicKey:" + base64.RawURLEncoding.EncodeToString(publicKeyBytes)

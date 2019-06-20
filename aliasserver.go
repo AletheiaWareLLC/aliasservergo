@@ -28,7 +28,7 @@ import (
 	"time"
 )
 
-func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
@@ -36,7 +36,7 @@ func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, template *tem
 			alias := bcnetgo.GetQueryParameter(r.URL.Query(), "alias")
 			log.Println("Alias", alias)
 
-			r, a, err := aliases.GetRecord(cache, alias)
+			r, a, err := aliases.GetRecord(cache, network, alias)
 			if err != nil {
 				log.Println(err)
 				return
@@ -103,7 +103,11 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 					return
 				}
 
-				if err := aliases.UniqueAlias(node.Cache, alias[0]); err != nil {
+				if err := bcgo.Pull(aliases, node.Cache, node.Network); err != nil {
+					log.Println(err)
+				}
+
+				if err := aliases.UniqueAlias(node.Cache, node.Network, alias[0]); err != nil {
 					log.Println(err)
 					return
 				}
