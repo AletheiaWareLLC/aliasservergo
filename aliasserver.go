@@ -188,7 +188,6 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 				// Push update to peers
 				if err := bcgo.Push(aliases, node.Cache, node.Network); err != nil {
 					log.Println(err)
-					return
 				}
 			}
 		default:
