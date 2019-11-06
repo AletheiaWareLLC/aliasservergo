@@ -20,7 +20,7 @@ import (
 	"encoding/base64"
 	"github.com/AletheiaWareLLC/aliasgo"
 	"github.com/AletheiaWareLLC/bcgo"
-	"github.com/AletheiaWareLLC/bcnetgo"
+	"github.com/AletheiaWareLLC/netgo"
 	"github.com/golang/protobuf/proto"
 	"html/template"
 	"log"
@@ -33,7 +33,7 @@ func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, network bcgo.
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
 		case "GET":
-			alias := bcnetgo.GetQueryParameter(r.URL.Query(), "alias")
+			alias := netgo.GetQueryParameter(r.URL.Query(), "alias")
 			log.Println("Alias", alias)
 
 			r, a, err := aliases.GetRecord(cache, network, alias)
@@ -66,8 +66,8 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
 		case "GET":
-			alias := bcnetgo.GetQueryParameter(r.URL.Query(), "alias")
-			publicKey := bcnetgo.GetQueryParameter(r.URL.Query(), "publicKey")
+			alias := netgo.GetQueryParameter(r.URL.Query(), "alias")
+			publicKey := netgo.GetQueryParameter(r.URL.Query(), "publicKey")
 			log.Println("Alias", alias)
 			log.Println("PublicKey", publicKey)
 
