@@ -95,7 +95,7 @@ func TestAliasHandler(t *testing.T) {
 		})
 		cache.PutBlock(blockHash, block)
 		aliases := aliasgo.OpenAliasChannel()
-		if err := bcgo.LoadHead(aliases, cache, nil); err != nil {
+		if err := aliases.LoadHead(cache, nil); err != nil {
 			t.Errorf("Expected no error, got '%s'", err)
 		}
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)

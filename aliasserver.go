@@ -28,7 +28,7 @@ import (
 	"net/http"
 )
 
-func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
@@ -36,7 +36,7 @@ func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, network bcgo.
 			alias := netgo.GetQueryParameter(r.URL.Query(), "alias")
 			log.Println("Alias", alias)
 
-			r, a, err := aliases.GetRecord(cache, network, alias)
+			r, a, err := aliasgo.GetRecord(aliases, cache, network, alias)
 			if err != nil {
 				log.Println(err)
 				return
@@ -61,7 +61,7 @@ func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, network bcgo.
 	}
 }
 
-func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, listener bcgo.MiningListener, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold uint64, listener bcgo.MiningListener, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
@@ -103,11 +103,11 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 					return
 				}
 
-				if err := bcgo.Pull(aliases, node.Cache, node.Network); err != nil {
+				if err := aliases.Pull(node.Cache, node.Network); err != nil {
 					log.Println(err)
 				}
 
-				if err := aliases.UniqueAlias(node.Cache, node.Network, alias[0]); err != nil {
+				if err := aliasgo.UniqueAlias(aliases, node.Cache, node.Network, alias[0]); err != nil {
 					log.Println(err)
 					return
 				}
@@ -178,7 +178,7 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 				log.Println("Wrote Record", base64.RawURLEncoding.EncodeToString(reference.RecordHash))
 
 				// Mine record into blockchain
-				hash, _, err := node.Mine(aliases, listener)
+				hash, _, err := node.Mine(aliases, threshold, listener)
 				if err != nil {
 					log.Println(err)
 					return
@@ -186,7 +186,7 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 				log.Println("Mined Alias", base64.RawURLEncoding.EncodeToString(hash))
 
 				// Push update to peers
-				if err := bcgo.Push(aliases, node.Cache, node.Network); err != nil {
+				if err := aliases.Push(node.Cache, node.Network); err != nil {
 					log.Println(err)
 				}
 			}
