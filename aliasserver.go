@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"github.com/AletheiaWareLLC/aliasgo"
 	"github.com/AletheiaWareLLC/bcgo"
+	"github.com/AletheiaWareLLC/cryptogo"
 	"github.com/AletheiaWareLLC/netgo"
 	"github.com/golang/protobuf/proto"
 	"html/template"
@@ -118,12 +119,12 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 					return
 				}
 
-				pubFormatValue, ok := bcgo.PublicKeyFormat_value[publicKeyFormat[0]]
+				pubFormatValue, ok := cryptogo.PublicKeyFormat_value[publicKeyFormat[0]]
 				if !ok {
 					log.Println("Unrecognized Public Key Format")
 					return
 				}
-				pubFormat := bcgo.PublicKeyFormat(pubFormatValue)
+				pubFormat := cryptogo.PublicKeyFormat(pubFormatValue)
 
 				sig, err := base64.RawURLEncoding.DecodeString(signature[0])
 				if err != nil {
@@ -131,14 +132,14 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 					return
 				}
 
-				sigAlgValue, ok := bcgo.SignatureAlgorithm_value[signatureAlgorithm[0]]
+				sigAlgValue, ok := cryptogo.SignatureAlgorithm_value[signatureAlgorithm[0]]
 				if !ok {
 					log.Println("Unrecognized Signature Algorithm")
 					return
 				}
-				sigAlg := bcgo.SignatureAlgorithm(sigAlgValue)
+				sigAlg := cryptogo.SignatureAlgorithm(sigAlgValue)
 
-				publicKey, err := bcgo.ParseRSAPublicKey(pubKey, pubFormat)
+				publicKey, err := cryptogo.ParseRSAPublicKey(pubKey, pubFormat)
 				if err != nil {
 					log.Println(err)
 					return
@@ -156,7 +157,7 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 					return
 				}
 
-				if err := bcgo.VerifySignature(publicKey, bcgo.Hash(data), sig, sigAlg); err != nil {
+				if err := cryptogo.VerifySignature(publicKey, cryptogo.Hash(data), sig, sigAlg); err != nil {
 					log.Println(err)
 					return
 				}
@@ -165,7 +166,7 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 					Timestamp:           uint64(time.Now().UnixNano()),
 					Creator:             alias[0],
 					Payload:             data,
-					EncryptionAlgorithm: bcgo.EncryptionAlgorithm_UNKNOWN_ENCRYPTION,
+					EncryptionAlgorithm: cryptogo.EncryptionAlgorithm_UNKNOWN_ENCRYPTION,
 					Signature:           sig,
 					SignatureAlgorithm:  sigAlg,
 				}

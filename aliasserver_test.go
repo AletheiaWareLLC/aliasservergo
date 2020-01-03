@@ -23,6 +23,7 @@ import (
 	"github.com/AletheiaWareLLC/aliasgo"
 	"github.com/AletheiaWareLLC/aliasservergo"
 	"github.com/AletheiaWareLLC/bcgo"
+	"github.com/AletheiaWareLLC/cryptogo"
 	"github.com/AletheiaWareLLC/testinggo"
 	"html/template"
 	"net/http"
@@ -58,21 +59,21 @@ func TestAliasHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 		key, err := rsa.GenerateKey(rand.Reader, 4096)
 		testinggo.AssertNoError(t, err)
-		publicKeyBytes, err := bcgo.RSAPublicKeyToPKIXBytes(&key.PublicKey)
+		publicKeyBytes, err := cryptogo.RSAPublicKeyToPKIXBytes(&key.PublicKey)
 		testinggo.AssertNoError(t, err)
-		publicKeyFormat := bcgo.PublicKeyFormat_PKIX
-		hash, err := bcgo.HashProtobuf(&aliasgo.Alias{
+		publicKeyFormat := cryptogo.PublicKeyFormat_PKIX
+		hash, err := cryptogo.HashProtobuf(&aliasgo.Alias{
 			Alias:        "Alice",
 			PublicKey:    publicKeyBytes,
 			PublicFormat: publicKeyFormat,
 		})
 		testinggo.AssertNoError(t, err)
-		signatureAlgorithm := bcgo.SignatureAlgorithm_SHA512WITHRSA_PSS
-		signature, err := bcgo.CreateSignature(key, hash, signatureAlgorithm)
+		signatureAlgorithm := cryptogo.SignatureAlgorithm_SHA512WITHRSA_PSS
+		signature, err := cryptogo.CreateSignature(key, hash, signatureAlgorithm)
 		testinggo.AssertNoError(t, err)
 		record, err := aliasgo.CreateAliasRecord("Alice", publicKeyBytes, publicKeyFormat, signature, signatureAlgorithm)
 		testinggo.AssertNoError(t, err)
-		recordHash, err := bcgo.HashProtobuf(record)
+		recordHash, err := cryptogo.HashProtobuf(record)
 		testinggo.AssertNoError(t, err)
 		block := &bcgo.Block{
 			Timestamp:   record.Timestamp,
@@ -84,7 +85,7 @@ func TestAliasHandler(t *testing.T) {
 				},
 			},
 		}
-		blockHash, err := bcgo.HashProtobuf(block)
+		blockHash, err := cryptogo.HashProtobuf(block)
 		testinggo.AssertNoError(t, err)
 		cache := bcgo.NewMemoryCache(10)
 		cache.PutHead("Alias", &bcgo.Reference{
