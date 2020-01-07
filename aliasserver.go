@@ -26,7 +26,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"time"
 )
 
 func AliasHandler(aliases *aliasgo.AliasChannel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
@@ -163,7 +162,7 @@ func AliasRegistrationHandler(aliases *aliasgo.AliasChannel, node *bcgo.Node, li
 				}
 
 				record := &bcgo.Record{
-					Timestamp:           uint64(time.Now().UnixNano()),
+					Timestamp:           bcgo.Timestamp(),
 					Creator:             alias[0],
 					Payload:             data,
 					EncryptionAlgorithm: cryptogo.EncryptionAlgorithm_UNKNOWN_ENCRYPTION,
