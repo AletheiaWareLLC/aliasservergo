@@ -36,19 +36,20 @@ func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network,
 			alias := netgo.GetQueryParameter(r.URL.Query(), "alias")
 			log.Println("Alias", alias)
 
-			r, a, err := aliasgo.GetRecord(aliases, cache, network, alias)
-			if err != nil {
-				log.Println(err)
-				return
-			}
 			data := struct {
 				Alias     string
 				Timestamp string
 				PublicKey string
-			}{
-				Alias:     alias,
-				Timestamp: bcgo.TimestampToString(r.Timestamp),
-				PublicKey: base64.RawURLEncoding.EncodeToString(a.PublicKey),
+			}{}
+			if alias != "" {
+				r, a, err := aliasgo.GetRecord(aliases, cache, network, alias)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				data.Alias = alias
+				data.Timestamp = bcgo.TimestampToString(r.Timestamp)
+				data.PublicKey = base64.RawURLEncoding.EncodeToString(a.PublicKey)
 			}
 			log.Println("Data", data)
 			if err := template.Execute(w, data); err != nil {
