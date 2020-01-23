@@ -103,6 +103,11 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 					return
 				}
 
+				if err := aliasgo.ValidateAlias(alias[0]); err != nil {
+					log.Println(err)
+					return
+				}
+
 				if err := aliases.Pull(node.Cache, node.Network); err != nil {
 					log.Println(err)
 				}
