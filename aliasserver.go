@@ -62,6 +62,51 @@ func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network,
 	}
 }
 
+func AliasListHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path, r.Header)
+		switch r.Method {
+		case "GET":
+			type TemplateAlias struct {
+				Alias     string
+				Timestamp string
+				Hash      string
+			}
+			as := make([]TemplateAlias, 0)
+			if err := bcgo.Iterate(aliases.Name, aliases.Head, nil, cache, network, func(h []byte, b *bcgo.Block) error {
+				for _, entry := range b.Entry {
+					record := entry.Record
+					a := &aliasgo.Alias{}
+					err := proto.Unmarshal(record.Payload, a)
+					if err != nil {
+						return err
+					}
+					as = append(as, TemplateAlias{
+						Alias:     a.Alias,
+						Timestamp: bcgo.TimestampToString(record.Timestamp),
+						Hash:      base64.RawURLEncoding.EncodeToString(h),
+					})
+				}
+				return nil
+			}); err != nil {
+				log.Println(err)
+				return
+			}
+			data := struct {
+				Alias []TemplateAlias
+			}{
+				Alias: as,
+			}
+			if err := template.Execute(w, data); err != nil {
+				log.Println(err)
+				return
+			}
+		default:
+			log.Println("Unsupported method", r.Method)
+		}
+	}
+}
+
 func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold uint64, listener bcgo.MiningListener, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
