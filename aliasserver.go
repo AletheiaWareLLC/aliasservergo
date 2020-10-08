@@ -51,7 +51,6 @@ func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network,
 				data.Timestamp = bcgo.TimestampToString(r.Timestamp)
 				data.PublicKey = base64.RawURLEncoding.EncodeToString(a.PublicKey)
 			}
-			log.Println("Data", data)
 			if err := template.Execute(w, data); err != nil {
 				log.Println(err)
 				return
@@ -124,7 +123,6 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 				Alias:     alias,
 				PublicKey: publicKey,
 			}
-			log.Println("Data", data)
 			if err := template.Execute(w, data); err != nil {
 				log.Println(err)
 				return
@@ -221,6 +219,8 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 					SignatureAlgorithm:  sigAlg,
 				}
 
+				// TODO should this write to cache, or just mine the blockentry directly?
+				// Could cause issues where alias is registered elsewhere in race-condition with this node, but this record is sitting in the cache waiting to get mined
 				reference, err := bcgo.WriteRecord(aliasgo.ALIAS, node.Cache, record)
 				if err != nil {
 					log.Println(err)
