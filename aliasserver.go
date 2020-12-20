@@ -26,6 +26,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 )
 
 func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
@@ -217,6 +218,11 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 					EncryptionAlgorithm: cryptogo.EncryptionAlgorithm_UNKNOWN_ENCRYPTION,
 					Signature:           sig,
 					SignatureAlgorithm:  sigAlg,
+				}
+				if l, ok := os.LookupEnv(bcgo.LIVE_FLAG); ok {
+					record.Meta = map[string]string{
+						bcgo.LIVE_FLAG: l,
+					}
 				}
 
 				// TODO should this write to cache, or just mine the blockentry directly?
