@@ -29,7 +29,7 @@ import (
 	"os"
 )
 
-func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
@@ -43,7 +43,7 @@ func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network,
 				PublicKey string
 			}{}
 			if alias != "" {
-				r, a, err := aliasgo.GetRecord(aliases, cache, network, alias)
+				r, a, err := aliasgo.GetRecord(aliases, cache, nil, alias)
 				if err != nil {
 					log.Println(err)
 					return
@@ -62,7 +62,7 @@ func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network,
 	}
 }
 
-func AliasListHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Network, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasListHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path, r.Header)
 		switch r.Method {
@@ -73,7 +73,7 @@ func AliasListHandler(aliases *bcgo.Channel, cache bcgo.Cache, network bcgo.Netw
 				Hash      string
 			}
 			as := make([]TemplateAlias, 0)
-			if err := bcgo.Iterate(aliases.Name, aliases.Head, nil, cache, network, func(h []byte, b *bcgo.Block) error {
+			if err := bcgo.Iterate(aliases.Name, aliases.Head, nil, cache, nil, func(h []byte, b *bcgo.Block) error {
 				for _, entry := range b.Entry {
 					record := entry.Record
 					a := &aliasgo.Alias{}

@@ -44,7 +44,7 @@ func TestAliasHandler(t *testing.T) {
 		aliases := aliasgo.OpenAliasChannel()
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, temp)
 		handler(response, request)
 
 		expected := ""
@@ -100,7 +100,7 @@ func TestAliasHandler(t *testing.T) {
 		}
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
-		handler := aliasservergo.AliasHandler(aliases, cache, nil, temp)
+		handler := aliasservergo.AliasHandler(aliases, cache, temp)
 		handler(response, request)
 
 		expected := "Alias:Alice Timestamp:" + bcgo.TimestampToString(block.Timestamp) + " PublicKey:" + base64.RawURLEncoding.EncodeToString(publicKeyBytes)
