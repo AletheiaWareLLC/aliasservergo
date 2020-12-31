@@ -17,11 +17,11 @@
 package aliasservergo
 
 import (
+	"aletheiaware.com/aliasgo"
+	"aletheiaware.com/bcgo"
+	"aletheiaware.com/cryptogo"
+	"aletheiaware.com/netgo"
 	"encoding/base64"
-	"github.com/AletheiaWareLLC/aliasgo"
-	"github.com/AletheiaWareLLC/bcgo"
-	"github.com/AletheiaWareLLC/cryptogo"
-	"github.com/AletheiaWareLLC/netgo"
 	"github.com/golang/protobuf/proto"
 	"html/template"
 	"log"

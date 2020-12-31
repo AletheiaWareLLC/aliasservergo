@@ -17,14 +17,14 @@
 package aliasservergo_test
 
 import (
+	"aletheiaware.com/aliasgo"
+	"aletheiaware.com/aliasservergo"
+	"aletheiaware.com/bcgo"
+	"aletheiaware.com/cryptogo"
+	"aletheiaware.com/testinggo"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/base64"
-	"github.com/AletheiaWareLLC/aliasgo"
-	"github.com/AletheiaWareLLC/aliasservergo"
-	"github.com/AletheiaWareLLC/bcgo"
-	"github.com/AletheiaWareLLC/cryptogo"
-	"github.com/AletheiaWareLLC/testinggo"
 	"html/template"
 	"net/http"
 	"net/http/httptest"
