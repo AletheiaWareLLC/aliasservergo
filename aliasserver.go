@@ -225,22 +225,23 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 					}
 				}
 
-				// TODO should this write to cache, or just mine the blockentry directly?
-				// Could cause issues where alias is registered elsewhere in race-condition with this node, but this record is sitting in the cache waiting to get mined
-				reference, err := bcgo.WriteRecord(aliasgo.ALIAS, node.Cache, record)
+				recordHash, err := cryptogo.HashProtobuf(record)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				log.Println("Wrote Record", base64.RawURLEncoding.EncodeToString(reference.RecordHash))
+				log.Println("Created Record", base64.RawURLEncoding.EncodeToString(recordHash))
 
 				// Mine record into blockchain
-				hash, _, err := node.Mine(aliases, threshold, listener)
+				blockHash, _, err := node.MineEntries(aliases, threshold, listener, []*bcgo.BlockEntry{{
+					RecordHash: recordHash,
+					Record:     record,
+				}})
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				log.Println("Mined Alias", base64.RawURLEncoding.EncodeToString(hash))
+				log.Println("Mined Alias", base64.RawURLEncoding.EncodeToString(blockHash))
 
 				// Push update to peers
 				if err := aliases.Push(node.Cache, node.Network); err != nil {
