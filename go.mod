@@ -3,10 +3,10 @@ module aletheiaware.com/aliasservergo
 go 1.14
 
 require (
-	aletheiaware.com/aliasgo v1.1.6
-	aletheiaware.com/bcgo v1.1.8
-	aletheiaware.com/cryptogo v1.1.1
+	aletheiaware.com/aliasgo v1.1.7
+	aletheiaware.com/bcgo v1.1.9
+	aletheiaware.com/cryptogo v1.1.2
 	aletheiaware.com/netgo v1.1.4
-	aletheiaware.com/testinggo v1.1.2
-	github.com/golang/protobuf v1.4.3
+	aletheiaware.com/testinggo v1.1.3
+	github.com/golang/protobuf v1.5.2
 )
