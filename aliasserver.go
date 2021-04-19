@@ -29,12 +29,12 @@ import (
 	"os"
 )
 
-func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasHandler(aliases bcgo.Channel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
 		case "GET":
-			alias := netgo.GetQueryParameter(r.URL.Query(), "alias")
+			alias := netgo.QueryParameter(r.URL.Query(), "alias")
 			log.Println("Alias", alias)
 
 			data := struct {
@@ -43,7 +43,7 @@ func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *template.Te
 				PublicKey string
 			}{}
 			if alias != "" {
-				r, a, err := aliasgo.GetRecord(aliases, cache, nil, alias)
+				r, a, err := aliasgo.Record(aliases, cache, nil, alias)
 				if err != nil {
 					log.Println(err)
 					return
@@ -62,7 +62,7 @@ func AliasHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *template.Te
 	}
 }
 
-func AliasListHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasListHandler(aliases bcgo.Channel, cache bcgo.Cache, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path, r.Header)
 		switch r.Method {
@@ -73,7 +73,7 @@ func AliasListHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *templat
 				Hash      string
 			}
 			as := make([]TemplateAlias, 0)
-			if err := bcgo.Iterate(aliases.Name, aliases.Head, nil, cache, nil, func(h []byte, b *bcgo.Block) error {
+			if err := bcgo.Iterate(aliases.Name(), aliases.Head(), nil, cache, nil, func(h []byte, b *bcgo.Block) error {
 				for _, entry := range b.Entry {
 					record := entry.Record
 					a := &aliasgo.Alias{}
@@ -107,13 +107,13 @@ func AliasListHandler(aliases *bcgo.Channel, cache bcgo.Cache, template *templat
 	}
 }
 
-func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold uint64, listener bcgo.MiningListener, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
+func AliasRegistrationHandler(aliases bcgo.Channel, node bcgo.Node, threshold uint64, listener bcgo.MiningListener, template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL.Path)
 		switch r.Method {
 		case "GET":
-			alias := netgo.GetQueryParameter(r.URL.Query(), "alias")
-			publicKey := netgo.GetQueryParameter(r.URL.Query(), "publicKey")
+			alias := netgo.QueryParameter(r.URL.Query(), "alias")
+			publicKey := netgo.QueryParameter(r.URL.Query(), "publicKey")
 			log.Println("Alias", alias)
 			log.Println("PublicKey", publicKey)
 
@@ -153,11 +153,11 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 					return
 				}
 
-				if err := aliases.Pull(node.Cache, node.Network); err != nil {
+				if err := aliases.Pull(node.Cache(), node.Network()); err != nil {
 					log.Println(err)
 				}
 
-				if err := aliasgo.UniqueAlias(aliases, node.Cache, node.Network, alias[0]); err != nil {
+				if err := aliasgo.UniqueAlias(aliases, node.Cache(), node.Network(), alias[0]); err != nil {
 					log.Println(err)
 					return
 				}
@@ -233,7 +233,7 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 				log.Println("Created Record", base64.RawURLEncoding.EncodeToString(recordHash))
 
 				// Mine record into blockchain
-				blockHash, _, err := node.MineEntries(aliases, threshold, listener, []*bcgo.BlockEntry{{
+				blockHash, _, err := bcgo.MineEntries(node, aliases, threshold, listener, []*bcgo.BlockEntry{{
 					RecordHash: recordHash,
 					Record:     record,
 				}})
@@ -244,7 +244,7 @@ func AliasRegistrationHandler(aliases *bcgo.Channel, node *bcgo.Node, threshold 
 				log.Println("Mined Alias", base64.RawURLEncoding.EncodeToString(blockHash))
 
 				// Push update to peers
-				if err := aliases.Push(node.Cache, node.Network); err != nil {
+				if err := aliases.Push(node.Cache(), node.Network()); err != nil {
 					log.Println(err)
 				}
 			}

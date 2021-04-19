@@ -20,6 +20,7 @@ import (
 	"aletheiaware.com/aliasgo"
 	"aletheiaware.com/aliasservergo"
 	"aletheiaware.com/bcgo"
+	"aletheiaware.com/bcgo/cache"
 	"aletheiaware.com/cryptogo"
 	"aletheiaware.com/testinggo"
 	"crypto/rand"
@@ -40,7 +41,7 @@ func TestAliasHandler(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/alias?alias=Alice", nil)
 		response := httptest.NewRecorder()
 
-		cache := bcgo.NewMemoryCache(10)
+		cache := cache.NewMemory(10)
 		aliases := aliasgo.OpenAliasChannel()
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
 		testinggo.AssertNoError(t, err)
@@ -87,7 +88,7 @@ func TestAliasHandler(t *testing.T) {
 		}
 		blockHash, err := cryptogo.HashProtobuf(block)
 		testinggo.AssertNoError(t, err)
-		cache := bcgo.NewMemoryCache(10)
+		cache := cache.NewMemory(10)
 		cache.PutHead("Alias", &bcgo.Reference{
 			Timestamp:   block.Timestamp,
 			ChannelName: block.ChannelName,
@@ -95,7 +96,7 @@ func TestAliasHandler(t *testing.T) {
 		})
 		cache.PutBlock(blockHash, block)
 		aliases := aliasgo.OpenAliasChannel()
-		if err := aliases.LoadHead(cache, nil); err != nil {
+		if err := aliases.Load(cache, nil); err != nil {
 			t.Errorf("Expected no error, got '%s'", err)
 		}
 		temp, err := template.New("AliasTest").Parse(TEMPLATE)
