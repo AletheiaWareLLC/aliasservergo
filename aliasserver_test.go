@@ -70,9 +70,9 @@ func TestAliasHandler(t *testing.T) {
 		})
 		testinggo.AssertNoError(t, err)
 		signatureAlgorithm := cryptogo.SignatureAlgorithm_SHA512WITHRSA_PSS
-		signature, err := cryptogo.CreateSignature(key, hash, signatureAlgorithm)
+		signature, err := cryptogo.CreateSignature(signatureAlgorithm, key, hash)
 		testinggo.AssertNoError(t, err)
-		record, err := aliasgo.CreateAliasRecord("Alice", publicKeyBytes, publicKeyFormat, signature, signatureAlgorithm)
+		record, err := aliasgo.CreateAliasRecord("Alice", publicKeyFormat, publicKeyBytes, signatureAlgorithm, signature)
 		testinggo.AssertNoError(t, err)
 		recordHash, err := cryptogo.HashProtobuf(record)
 		testinggo.AssertNoError(t, err)

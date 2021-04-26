@@ -188,7 +188,7 @@ func AliasRegistrationHandler(aliases bcgo.Channel, node bcgo.Node, threshold ui
 				}
 				sigAlg := cryptogo.SignatureAlgorithm(sigAlgValue)
 
-				publicKey, err := cryptogo.ParseRSAPublicKey(pubKey, pubFormat)
+				publicKey, err := cryptogo.ParseRSAPublicKey(pubFormat, pubKey)
 				if err != nil {
 					log.Println(err)
 					return
@@ -206,7 +206,7 @@ func AliasRegistrationHandler(aliases bcgo.Channel, node bcgo.Node, threshold ui
 					return
 				}
 
-				if err := cryptogo.VerifySignature(publicKey, cryptogo.Hash(data), sig, sigAlg); err != nil {
+				if err := cryptogo.VerifySignature(sigAlg, publicKey, cryptogo.Hash(data), sig); err != nil {
 					log.Println(err)
 					return
 				}
